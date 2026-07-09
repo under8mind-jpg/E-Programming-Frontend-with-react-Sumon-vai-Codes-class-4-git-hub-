@@ -1,0 +1,185 @@
+
+
+
+
+
+
+body{
+
+    padding:20px;
+
+    
+    
+    
+
+}
+
+
+.position {
+
+    background-color: rebeccapurple;
+
+    color: white;
+
+    padding: 25px;
+
+    position: relative;
+
+    width: 90vw;
+
+    height: 500px;
+
+    
+  
+
+
+
+   
+
+}
+
+
+.divOne,
+.divTwo,
+.divThree {
+
+
+
+    padding: 10px;
+
+
+    width: 50px;
+
+
+}
+
+
+.divOne {
+
+    background-color: #21c5df;
+
+
+    position: absolute;
+
+
+    z-index: 3;
+
+
+       
+    top: 230px;
+    right: 47%;
+
+   
+
+   
+
+}
+
+
+.divTwo {
+
+
+    background-color: hsl(120, 66%, 44%);
+
+    position: absolute;
+
+    top: 250px;
+    right: 50%;
+
+    
+    z-index: 2;
+}
+
+.divFour{
+
+     background-color: hsl(41, 83%, 45%);
+
+     position:absolute;
+
+     bottom:100%;
+
+     right:90%;
+
+     padding-left:50px;
+
+  
+     width:100px;
+
+
+}
+
+.divFour{
+
+     background-color: hsl(41, 83%, 45%);
+
+     position:absolute;
+
+     bottom:100%;
+
+     left:0%;
+
+     padding-left:50px;
+
+  
+     width:500px;
+
+
+}
+
+
+.divThree {
+
+
+    background-color: hsl(41, 83%, 45%);
+
+
+    position: absolute;
+
+
+    top: 270px;
+    right: 53%;
+
+
+}
+
+
+/* //::view-transition */
+
+    /* .divOne,.divTwo,.divThree{
+
+     transition: 3s ease-in-out;
+
+     } */
+
+
+/* //HOVER */
+
+.divOne:hover,.divTwo:hover,.divThree:hover {
+
+   
+
+     width:300px;
+
+     background-image: url("https://tse2.mm.bing.net/th/id/OIP.jiWFBlnijAkqCAbVuooXiwHaJQ?rs=1&pid=ImgDetMain&o=7&rm=3");
+     transition: 3s ease-in-out;
+
+}
+
+
+
+.position{
+
+
+    background-image: url("https://images.pexels.com/photos/1563356/pexels-photo-1563356.jpeg");
+
+    background-size: cover;
+
+    
+
+    background-repeat: no-repeat;
+
+    rotate:0.9deg;
+
+
+}
+

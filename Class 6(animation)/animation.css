@@ -1,0 +1,86 @@
+.box {
+
+    width: 50px;
+    height: 50px;
+
+    color: #ffffff;
+
+    background-color: red;
+
+    padding: 5px;
+    margin: 20px;
+
+
+
+
+}
+
+/* //animation */
+
+.box {
+
+    animation-duration: 3s;
+
+    animation-iteration-count: infinite;
+
+    animation-name: nahid2;
+
+    animation-timing-function: ease-in-out;
+
+    animation-delay: 2s;
+
+    /* animation-play-state: paused; */
+
+
+
+}
+
+/* //from to 
+
+@keyframes firstAnimation {
+
+    from {
+
+        transform: translate(1000px);
+        background-color: green;
+
+    }
+
+    to {
+
+        transform: translate(100px);
+
+    }
+
+
+
+} */
+
+
+/* //multiple animations */
+
+@keyframes nahid2 {
+
+    0%{
+            transform:translate(100px);
+            background-color: #000;
+    }
+
+    10%{
+            transform:translate(50px);
+            background-color: hsl(200, 67%, 37%);
+    }
+
+    60%{
+            transform:translate(70px);
+            background-color: hsl(0, 81%, 44%);
+    }
+
+    100%{
+
+            transform:translate(0px);
+            background-color: hsl(63, 85%, 49%);
+
+    }
+    
+}

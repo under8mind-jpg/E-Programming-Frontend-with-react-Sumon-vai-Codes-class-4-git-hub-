@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Matir Bashon | Billing System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1>🏨 Hotel Matir Bashon</h1>
+            <p class="subtitle">Smart Billing & Analytics System</p>
+        </div>
+
+        <!-- Countdown Timer -->
+        <div class="countdown-section">
+            <div class="countdown-header">Chart Reset Countdown (24 Hours)</div>
+            <div class="countdown-bar">
+                <div id="countdownFill" class="countdown-progress"></div>
+            </div>
+            <div class="countdown-info">
+                <span id="countdownTime">24h 00m 00s</span>
+                <span id="nextReset">Next reset: --:--</span>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="switchTab('orders')">📝 Orders</button>
+            <button class="tab-btn" onclick="switchTab('analytics')">📊 Analytics</button>
+            <button class="tab-btn" onclick="switchTab('history')">📋 History</button>
+        </div>
+
+        <!-- Orders Tab -->
+        <div id="ordersTab" class="tab-content active">
+            <div class="two-column">
+                <!-- Left Column: Order Calculator -->
+                <div class="column">
+                    <div class="card">
+                        <h2>💵 Order Calculator</h2>
+                        <div class="total-display" id="totalDisplay">₹0</div>
+                        <div id="orderItems" class="items-list"></div>
+                        
+                        <!-- Add Product -->
+                        <div class="add-product-form">
+                            <h3>Add New Product</h3>
+                            <input type="text" id="productName" placeholder="Product Name" class="input-field">
+                            <input type="number" id="productPrice" placeholder="Price" class="input-field">
+                            <div class="color-picker-row">
+                                <label>Color:</label>
+                                <input type="color" id="productColor" value="#FF6B6B" class="color-picker">
+                            </div>
+                            <button onclick="handleAddProduct()" class="btn btn-primary">+ Add Product</button>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button onclick="handleSaveOrder()" class="btn btn-success">💾 Save Order</button>
+                            <button onclick="handleResetQty()" class="btn btn-warning">🔄 Reset Qty</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Product Management -->
+                <div class="column">
+                    <div class="card">
+                        <h2>⚙️ Manage Products</h2>
+                        <div id="productsList" class="products-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analyticsTab" class="tab-content">
+            <div class="card">
+                <h2>📊 Sales Analytics</h2>
+                
+                <!-- Timeframe Selector -->
+                <div class="timeframe-selector">
+                    <button class="tf-btn active" onclick="switchTimeframe('daily')">Daily</button>
+                    <button class="tf-btn" onclick="switchTimeframe('weekly')">Weekly</button>
+                    <button class="tf-btn" onclick="switchTimeframe('monthly')">Monthly</button>
+                </div>
+
+                <!-- Summary Stats -->
+                <div class="stats-grid" id="statsGrid"></div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Total Sales</h3>
+                        <canvas id="totalSalesChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Top Products</h3>
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Product Distribution</h3>
+                        <canvas id="productDistChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Product Lists -->
+                <div class="two-column">
+                    <div class="column">
+                        <div class="card">
+                            <h3>🏆 Top Selling</h3>
+                            <div id="topProductsList" class="list-items"></div>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="card">
+                            <h3>📉 Low Selling</h3>
+                            <div id="lowProductsList" class="list-items"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="historyTab" class="tab-content">
+            <div class="card">
+                <h2>📋 Order History</h2>
+                <div class="history-controls">
+                    <button onclick="handleClearHistory()" class="btn btn-danger">🗑️ Clear History</button>
+                </div>
+                <div id="historyList" class="history-items"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Matir Bashon | Billing System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #0f3460;
+            --gold: #e94560;
+            --gold-light: #ff6b6b;
+            --cream: #f8f9fa;
+            --white: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-lg: rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: var(--primary);
+            line-height: 1.6;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            color: #666;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .total-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 25px 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(26, 26, 46, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease 0.1s both;
+        }
+
+        .total-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(233, 69, 96, 0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        .total-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+        }
+
+        .total-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .currency {
+            font-size: 1.5rem;
+            vertical-align: super;
+            margin-right: 5px;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.6s ease 0.2s both;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            background: white;
+            color: var(--primary);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow-lg);
+        }
+
+        .nav-btn.active {
+            background: var(--gold);
+            color: white;
+            box-shadow: 0 8px 25px rgba(233, 69, 96, 0.3);
+        }
+
+        .nav-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* COMPACT MENU GRID */
+        .item-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .item-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .item-grid::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 3px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background: var(--cream);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            min-height: 60px;
+        }
+
+        .order-item:hover {
+            border-color: var(--gold);
+            transform: translateX(3px);
+            box-shadow: 0 4px 12px var(--shadow);
+        }
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 2px;
+            color: var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-price {
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 4px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px var(--shadow);
+            flex-shrink: 0;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .qty-btn.minus {
+            background: #fee;
+            color: var(--gold);
+        }
+
+        .qty-btn.plus {
+            background: #efe;
+            color: #22c55e;
+        }
+
+        .qty-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .qty-input {
+            width: 40px;
+            text-align: center;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            background: transparent;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 18px;
+            margin-top: 25px;
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(233, 69, 96, 0.4);
+        }
+
+        .manage-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto auto;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background: var(--cream);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .manage-item.disabled {
+            opacity: 0.5;
+            filter: grayscale(0.8);
+        }
+
+        .manage-input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .manage-input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .manage-input:disabled {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.enable {
+            background: #22c55e;
+            color: white;
+        }
+
+        .toggle-btn.disable {
+            background: #6b7280;
+            color: white;
+        }
+
+        .delete-btn {
+            padding: 10px 15px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .add-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px dashed #e0e0e0;
+        }
+
+        .add-btn {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        /* COLOR PICKER FOR PRODUCTS */
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            padding: 2px;
+            background: white;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border-radius: 4px;
+            border: none;
+        }
+
+        /* Import/Export Buttons */
+        .data-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn-secondary {
+            padding: 10px 20px;
+            background: var(--cream);
+            color: var(--primary);
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn-secondary:hover {
+            border-color: var(--gold);
+            background: white;
+        }
+
+        .action-btn-secondary svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .history-list {
+            max-height: 500px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 3px;
+        }
+
+        .history-item {
+            background: var(--cream);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--gold);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .token {
+            font-family: 'Playfair Display', serif;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .history-time {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .history-total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .history-delete-btn {
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-delete-btn:hover {
+            background: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .history-delete-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* SIMPLIFIED CHART */
+        .chart-wrapper {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+        }
+
+        .chart-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            background: var(--cream);
+            border-bottom: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .chart-tool-btn {
+            padding: 6px 14px;
+            background: white;
+            color: var(--primary);
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .chart-tool-btn:hover {
+            border-color: var(--gold);
+        }
+
+        .chart-tool-btn.active {
+            background: var(--gold);
+            color: white;
+            border-color: var(--gold);
+        }
+
+        /* COUNTDOWN TIMER */
+        .countdown-container {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--primary);
+            color: white;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .countdown-label {
+            color: #aaa;
+        }
+
+        .countdown-time {
+            font-family: monospace;
+            font-size: 1rem;
+            color: #4ade80;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            padding: 20px;
+        }
+
+        #salesChart {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 20px;
+            padding: 12px 16px;
+            background: var(--cream);
+            border-top: 1px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--primary);
+        }
+
+        .chart-legend-color {
+            width: 12px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .chart-modes {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            border: none;
+            background: var(--cream);
+            color: var(--primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: var(--gold);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 0.3; }
+        }
+
+        @media (max-width: 768px) {
+            .logo { font-size: 1.8rem; }
+            .total-amount { font-size: 2rem; }
+            .manage-item, .add-form { grid-template-columns: 1fr; }
+            .item-grid { grid-template-columns: 1fr; }
+            .history-footer { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .countdown-container { margin-left: 0; margin-top: 10px; width: 100%; justify-content: center; }
+            .chart-toolbar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1 class="logo">Hotel Matir Bashon</h1>
+            <p class="tagline">Premium Billing System</p>
+        </header>
+
+        <div class="total-card">
+            <div class="total-label">Current Order Total</div>
+            <div class="total-amount"><span class="currency">৳</span><span id="totalAmount">0</span></div>
+        </div>
+
+        <nav class="nav-container">
+            <button class="nav-btn active" onclick="switchTab('order')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                Order
+            </button>
+            <button class="nav-btn" onclick="switchTab('manage')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Manage
+            </button>
+            <button class="nav-btn" onclick="switchTab('history')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                History
+            </button>
+            <button class="nav-btn" onclick="switchTab('chart')">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Analytics
+            </button>
+        </nav>
+
+        <!-- Order Section -->
+        <section id="order" class="section active">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    Menu Items
+                </h2>
+                <div id="itemList" class="item-grid"></div>
+                <button class="save-btn" onclick="saveOrder()">
+                    Complete Order & Save
+                </button>
+            </div>
+        </section>
+
+        <!-- Manage Section -->
+        <section id="manage" class="section">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Product Management
+                </h2>
+                <div id="manageList"></div>
+                <div class="add-form">
+                    <input type="text" id="newName" class="manage-input" placeholder="Product name">
+                    <input type="number" id="newPrice" class="manage-input" placeholder="Price (৳)">
+                    <div class="color-picker-wrapper">
+                        <input type="color" id="newColor" class="color-picker" value="#e94560">
+                    </div>
+                    <button class="add-btn" onclick="addItem()">Add Product</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="section">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Order History
+                </h2>
+
+                <div class="data-actions">
+                    <button class="action-btn-secondary" onclick="exportHistory()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        Export Data
+                    </button>
+                    <button class="action-btn-secondary" onclick="document.getElementById('fileInput').click()">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        Import Data
+                    </button>
+                    <input type="file" id="fileInput" accept=".json" onchange="importHistory(this)">
+                </div>
+
+                <div id="historyList" class="history-list"></div>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="chart" class="section">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                    Sales Analytics
+                </h2>
+
+                <!-- Chart Mode Toggle -->
+                <div class="chart-modes">
+                    <button class="mode-btn active" onclick="switchChartMode('products')">By Product</button>
+                    <button class="mode-btn" onclick="switchChartMode('total')">Total Sales</button>
+                </div>
+
+                <!-- Simplified Chart -->
+                <div class="chart-wrapper">
+                    <div class="chart-toolbar">
+                        <button class="chart-tool-btn active" onclick="setTimeRange('all')">All Time</button>
+                        <button class="chart-tool-btn" onclick="setTimeRange('7d')">Last 7 Days</button>
+                        <button class="chart-tool-btn" onclick="setTimeRange('30d')">Last 30 Days</button>
+                        <div class="countdown-container">
+                            <span class="countdown-label">New day in:</span>
+                            <span class="countdown-time" id="countdownTimer">--:--:--</span>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                    <div class="chart-legend" id="chartLegend"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Default colors for auto-assignment
+        const defaultColors = [
+            '#e94560', '#2962FF', '#22c55e', '#f59e0b', 
+            '#8b5cf6', '#ec4899', '#06b6d4', '#f97316',
+            '#84cc16', '#14b8a6', '#f43f5e', '#8b5cf6'
+        ];
+
+        // Data Management
+        let items = JSON.parse(localStorage.getItem('hb_items')) || [
+            { name: "Rice", price: 50, qty: 0, active: true, color: '#e94560' },
+            { name: "Chicken Curry", price: 120, qty: 0, active: true, color: '#2962FF' },
+            { name: "Fish Fry", price: 80, qty: 0, active: true, color: '#22c55e' },
+            { name: "Dal", price: 30, qty: 0, active: true, color: '#f59e0b' }
+        ];
+
+        let history = (JSON.parse(localStorage.getItem('hb_history')) || [])
+            .map(h => ({ ...h, time: new Date(h.time) }));
+
+        let chartMode = 'products';
+        let timeRange = 'all';
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            event.target.closest('.nav-btn').classList.add('active');
+
+            if (tabId === 'chart') {
+                renderChart();
+                startCountdown();
+            }
+        }
+
+        function switchChartMode(mode) {
+            chartMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderChart();
+        }
+
+        function setTimeRange(range) {
+            timeRange = range;
+            document.querySelectorAll('.chart-tool-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderChart();
+        }
+
+        function saveData() {
+            localStorage.setItem('hb_items', JSON.stringify(items));
+            localStorage.setItem('hb_history', JSON.stringify(history));
+        }
+
+        // Countdown Timer
+        function startCountdown() {
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+
+            const diff = tomorrow - now;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            const timerEl = document.getElementById('countdownTimer');
+            if (timerEl) {
+                timerEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+        }
+
+        function renderOrder() {
+            const list = document.getElementById('itemList');
+            const activeItems = items.filter(item => item.active);
+
+            if (activeItems.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        <p>No active products available</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = activeItems.map((item, index) => `
+                <div class="order-item">
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        <div class="item-price">৳${item.price}</div>
+                    </div>
+                    <div class="quantity-control">
+                        <button class="qty-btn minus" onclick="changeQty(${items.indexOf(item)}, -1)">−</button>
+                        <input type="number" class="qty-input" value="${item.qty}" 
+                               onchange="setQty(${items.indexOf(item)}, this.value)">
+                        <button class="qty-btn plus" onclick="changeQty(${items.indexOf(item)}, 1)">+</button>
+                    </div>
+                </div>
+            `).join('');
+
+            updateTotal();
+        }
+
+        function changeQty(index, delta) {
+            items[index].qty = Math.max(0, items[index].qty + delta);
+            renderOrder();
+            saveData();
+        }
+
+        function setQty(index, value) {
+            items[index].qty = Math.max(0, parseInt(value) || 0);
+            renderOrder();
+            saveData();
+        }
+
+        function updateTotal() {
+            const total = items.reduce((sum, item) => sum + (item.active ? item.qty * item.price : 0), 0);
+            document.getElementById('totalAmount').textContent = total.toLocaleString();
+        }
+
+        function saveOrder() {
+            const total = items.reduce((sum, item) => sum + (item.active ? item.qty * item.price : 0), 0);
+            if (total === 0) {
+                alert('Please add items to the order first');
+                return;
+            }
+
+            const order = {
+                token: 'ORD-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+                time: new Date(),
+                items: JSON.parse(JSON.stringify(items)),
+                total: total
+            };
+
+            history.push(order);
+            items.forEach(item => item.qty = 0);
+
+            saveData();
+            renderOrder();
+            renderHistory();
+
+            alert(`Order ${order.token} saved successfully! Total: ৳${total}`);
+        }
+
+        function renderManage() {
+            const list = document.getElementById('manageList');
+            list.innerHTML = items.map((item, index) => `
+                <div class="manage-item ${item.active ? '' : 'disabled'}">
+                    <input type="text" class="manage-input" value="${item.name}" 
+                           ${item.active ? '' : 'disabled'}
+                           onchange="editName(${index}, this.value)">
+                    <input type="number" class="manage-input" value="${item.price}" 
+                           ${item.active ? '' : 'disabled'}
+                           onchange="editPrice(${index}, this.value)">
+                    <div class="color-picker-wrapper">
+                        <input type="color" class="color-picker" value="${item.color || defaultColors[index % defaultColors.length]}" 
+                               onchange="editColor(${index}, this.value)">
+                    </div>
+                    <button class="toggle-btn ${item.active ? 'disable' : 'enable'}" 
+                            onclick="toggleItem(${index})">
+                        ${item.active ? 'Disable' : 'Enable'}
+                    </button>
+                    <button class="delete-btn" onclick="deleteItem(${index})">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        function editName(index, value) {
+            items[index].name = value;
+            saveData();
+        }
+
+        function editPrice(index, value) {
+            items[index].price = parseInt(value) || 0;
+            saveData();
+        }
+
+        function editColor(index, value) {
+            items[index].color = value;
+            saveData();
+            if (document.getElementById('chart').classList.contains('active')) {
+                renderChart();
+            }
+        }
+
+        function toggleItem(index) {
+            items[index].active = !items[index].active;
+            saveData();
+            renderManage();
+            renderOrder();
+        }
+
+        function deleteItem(index) {
+            if (confirm('Are you sure you want to delete this product?')) {
+                items.splice(index, 1);
+                saveData();
+                renderManage();
+                renderOrder();
+            }
+        }
+
+        function addItem() {
+            const name = document.getElementById('newName').value.trim();
+            const price = parseInt(document.getElementById('newPrice').value);
+            const color = document.getElementById('newColor').value;
+
+            if (!name || !price) {
+                alert('Please fill in both name and price');
+                return;
+            }
+
+            // Auto-assign color if not selected
+            const autoColor = color || defaultColors[items.length % defaultColors.length];
+
+            items.push({ name, price, qty: 0, active: true, color: autoColor });
+            document.getElementById('newName').value = '';
+            document.getElementById('newPrice').value = '';
+            document.getElementById('newColor').value = defaultColors[(items.length) % defaultColors.length];
+
+            saveData();
+            renderManage();
+            renderOrder();
+        }
+
+        function exportHistory() {
+            if (history.length === 0) {
+                alert('No history data to export');
+                return;
+            }
+
+            const dataStr = JSON.stringify(history, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `hotel_matir_bashon_history_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function importHistory(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (!Array.isArray(imported)) {
+                        throw new Error('Invalid data format');
+                    }
+
+                    const validData = imported.map(item => ({
+                        ...item,
+                        time: new Date(item.time)
+                    })).filter(item => item.token && item.total !== undefined);
+
+                    if (validData.length === 0) {
+                        throw new Error('No valid history entries found');
+                    }
+
+                    if (confirm(`Import ${validData.length} history entries? This will replace current history.`)) {
+                        history = validData;
+                        saveData();
+                        renderHistory();
+                        alert('History imported successfully!');
+                    }
+                } catch (err) {
+                    alert('Error importing file: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        function deleteHistoryItem(index) {
+            const item = history[index];
+            if (confirm(`Delete order ${item.token}?\nTotal: ৳${item.total}\nDate: ${new Date(item.time).toLocaleString()}`)) {
+                history.splice(index, 1);
+                saveData();
+                renderHistory();
+            }
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p>No orders yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const reversedHistory = history.map((item, originalIndex) => ({...item, originalIndex})).reverse();
+
+            list.innerHTML = reversedHistory.map(order => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="token">${order.token}</span>
+                        <span class="history-time">${new Date(order.time).toLocaleString()}</span>
+                    </div>
+                    <div class="history-footer">
+                        <span class="history-total">৳${order.total.toLocaleString()}</span>
+                        <button class="history-delete-btn" onclick="deleteHistoryItem(${order.originalIndex})">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Aggregate data by day
+        function aggregateByDay(data) {
+            const dailyData = {};
+
+            data.forEach(order => {
+                const date = new Date(order.time);
+                const dateKey = date.toISOString().split('T')[0];
+
+                if (!dailyData[dateKey]) {
+                    dailyData[dateKey] = {
+                        date: date,
+                        total: 0,
+                        items: {}
+                    };
+                }
+
+                dailyData[dateKey].total += order.total;
+
+                order.items.forEach(item => {
+                    if (!dailyData[dateKey].items[item.name]) {
+                        dailyData[dateKey].items[item.name] = 0;
+                    }
+                    dailyData[dateKey].items[item.name] += item.qty * item.price;
+                });
+            });
+
+            return Object.keys(dailyData)
+                .sort()
+                .map(key => ({
+                    date: dailyData[key].date,
+                    total: dailyData[key].total,
+                    items: dailyData[key].items
+                }));
+        }
+
+        function filterByTimeRange(dailyData) {
+            if (timeRange === 'all') return dailyData;
+
+            const now = new Date();
+            const days = parseInt(timeRange);
+            const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+            return dailyData.filter(d => d.date >= cutoff);
+        }
+
+        function renderChart() {
+            const canvas = document.getElementById('salesChart');
+            const ctx = canvas.getContext('2d');
+
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const paddingLeft = 60;
+            const paddingRight = 20;
+            const paddingTop = 20;
+            const paddingBottom = 50;
+
+            const chartWidth = width - paddingLeft - paddingRight;
+            const chartHeight = height - paddingTop - paddingBottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const dailyData = aggregateByDay(history);
+            const filteredData = filterByTimeRange(dailyData);
+
+            if (filteredData.length === 0) {
+                ctx.fillStyle = '#999';
+                ctx.font = '14px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('No data available', width / 2, height / 2);
+                document.getElementById('chartLegend').innerHTML = '';
+                return;
+            }
+
+            let maxVal = 0;
+            if (chartMode === 'total') {
+                maxVal = Math.max(...filteredData.map(d => d.total), 100);
+            } else {
+                filteredData.forEach(day => {
+                    Object.values(day.items).forEach(val => {
+                        if (val > maxVal) maxVal = val;
+                    });
+                });
+                maxVal = Math.max(maxVal, 100);
+            }
+
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#666';
+            ctx.font = '11px Inter';
+            ctx.textAlign = 'right';
+
+            for (let i = 0; i <= 5; i++) {
+                const y = paddingTop + (chartHeight / 5) * i;
+                const price = Math.round(maxVal - (maxVal / 5) * i);
+
+                ctx.beginPath();
+                ctx.moveTo(paddingLeft, y);
+                ctx.lineTo(width - paddingRight, y);
+                ctx.stroke();
+
+                ctx.fillText('৳' + price, paddingLeft - 8, y + 4);
+            }
+
+            const stepX = chartWidth / (filteredData.length - 1 || 1);
+
+            if (chartMode === 'total') {
+                ctx.beginPath();
+                ctx.strokeStyle = '#e94560';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                filteredData.forEach((day, i) => {
+                    const x = paddingLeft + i * stepX;
+                    const y = paddingTop + chartHeight - (day.total / maxVal) * chartHeight;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+
+                filteredData.forEach((day, i) => {
+                    const x = paddingLeft + i * stepX;
+                    const y = paddingTop + chartHeight - (day.total / maxVal) * chartHeight;
+
+                    ctx.beginPath();
+                    ctx.fillStyle = '#e94560';
+                    ctx.arc(x, y, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#666';
+                filteredData.forEach((day, i) => {
+                    const x = paddingLeft + i * stepX;
+                    const dateStr = day.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                    ctx.fillText(dateStr, x, height - paddingBottom + 20);
+                });
+
+                document.getElementById('chartLegend').innerHTML = `
+                    <div class="chart-legend-item">
+                        <div class="chart-legend-color" style="background: #e94560"></div>
+                        <span>Total Daily Sales</span>
+                    </div>
+                `;
+            } else {
+                const productNames = [...new Set(filteredData.flatMap(d => Object.keys(d.items)))];
+
+                productNames.forEach((productName) => {
+                    const product = items.find(i => i.name === productName);
+                    const color = product ? product.color : '#999';
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+
+                    filteredData.forEach((day, i) => {
+                        const x = paddingLeft + i * stepX;
+                        const val = day.items[productName] || 0;
+                        const y = paddingTop + chartHeight - (val / maxVal) * chartHeight;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    });
+                    ctx.stroke();
+
+                    filteredData.forEach((day, i) => {
+                        const x = paddingLeft + i * stepX;
+                        const val = day.items[productName] || 0;
+                        const y = paddingTop + chartHeight - (val / maxVal) * chartHeight;
+
+                        ctx.beginPath();
+                        ctx.fillStyle = color;
+                        ctx.arc(x, y, 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                });
+
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#666';
+                filteredData.forEach((day, i) => {
+                    const x = paddingLeft + i * stepX;
+                    const dateStr = day.date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+                    ctx.fillText(dateStr, x, height - paddingBottom + 20);
+                });
+
+                document.getElementById('chartLegend').innerHTML = productNames.map(name => {
+                    const product = items.find(i => i.name === name);
+                    const color = product ? product.color : '#999';
+                    return `
+                        <div class="chart-legend-item">
+                            <div class="chart-legend-color" style="background: ${color}"></div>
+                            <span>${name}</span>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if (document.getElementById('chart').classList.contains('active')) {
+                renderChart();
+            }
+        });
+
+        renderOrder();
+        renderManage();
+        renderHistory();
+
+        // Start countdown if on chart page
+        if (document.getElementById('chart').classList.contains('active')) {
+            startCountdown();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+.animaiton {
+
+
+    /* box design */
+
+    background-color: red;
+
+    border-radius: 50px;
+
+    border: 2px solid black;
+
+    padding: 30px;
+
+    margin-top: 25%;
+
+    width: 100px;
+
+    height: 100px;
+
+    position: relative;
+
+
+
+
+    /* //animation settings  */
+
+    animation-name: boxRound;
+
+    animation-duration: 3s;
+
+    animation-delay: 1s;
+
+    animation-iteration-count: infinite;
+
+    transition: 3s ease-in-out;
+
+
+
+}
+
+
+
+
+@keyframes boxRound {
+
+    
+
+    0% {
+
+        transform: rotate(0deg);
+
+        background-color: lab(52.77% 40.82 59.08);
+
+
+
+
+
+    }
+
+ 
+
+
+    
+
+    100% {
+         transform: rotate(360deg);
+
+            
+
+        }
+
+
+
+
+
+
+
+}
+
+.road {
+
+    animation-name: roadAni;
+
+    animation-duration: 4s;
+
+    animation-iteration-count: infinite;
+
+
+    background: black;
+
+    padding: 10px;
+
+    margin: 1px;
+
+    position: absolute;
+
+    width: 97.1%;
+
+
+    top: 470px;
+
+
+}
+
+
+
+/* button-transitoin */
+
+button:hover{
+
+    background-color: black;
+
+    color: white;
+
+    transition: 0.5s ease-in-out;
+
+    
+
+
+}
+ 
+/* button design   */
+
+button{
+
+    background-color: white;
+
+    color: black;
+
+    border: 2px solid black;
+
+    padding: 10px 20px;
+
+    font-size: 16px;
+
+    cursor: pointer;
+
+    position: absolute;
+
+    top: 550px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+
+}
