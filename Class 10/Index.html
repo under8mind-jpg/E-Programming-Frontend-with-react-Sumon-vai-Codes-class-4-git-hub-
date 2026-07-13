@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="flex justify-center items-center h-screen gap-8 ">
+
+    <div class="flex justify-center items-center h-[75%] gap-8 flex-col bg-gray-900 rounded-xl p-10">
+
+        <h1 class="text-4xl font-bold text-center text-white">
+            Welcome To Your Sugar Daddy's
+            <span class="text-emerald-300">Bank ↔ 🏦</span>
+        </h1>
+
+        <div class="flex gap-4">
+
+            <!-- Deposit -->
+            <div class="bg-[rgba(255,255,255,0.08)] my-10 px-5 py-3 rounded-xl h-auto w-auto">
+                <div class="bg-emerald-600 text-white px-8 py-4 rounded-xl flex flex-col h-full">
+                    <div class="font-bold">DEPOSIT</div>
+                    <div id="depositTotal" class="font-bold">0$</div>
+                    <input id="depositInput" type="number" placeholder="Enter amount" class="w-full mt-4 px-4 py-3 rounded-xl bg-white text-black border border-gray-300 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 my-4"/>
+                    <button id="depositBtn" class="font-bold rounded border border-white p-5 hover:bg-emerald-700 hover:text-white bg-white text-emerald-600 w-full h-auto">
+                        ADD
+                    </button>
+                </div>
+            </div>
+            <!-- Deposit -->
+
+            <!-- Withdraw -->
+            <div class="bg-[rgba(255,255,255,0.08)] my-10 px-5 py-3 rounded-xl h-auto w-auto">
+                <div class="bg-emerald-600 text-white px-8 py-4 rounded-xl flex flex-col h-full">
+                    <div class="font-bold">WITHDRAW</div>
+                    <div id="withdrawTotal" class="font-bold">0$</div>
+                    <input id="withdrawInput" type="number" placeholder="Enter amount" class="w-full mt-4 px-4 py-3 rounded-xl bg-white text-black border border-gray-300 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500 my-4"/>
+                    <button id="withdrawBtn" class="font-bold rounded border border-white p-5 hover:bg-emerald-700 hover:text-white bg-white text-emerald-600 w-full h-auto">
+                        RECEIVE
+                    </button>
+                </div>
+            </div>
+            <!-- Withdraw -->
+
+            <!-- Total -->
+            <div class="bg-[rgba(255,255,255,0.08)] my-10 px-5 py-3 rounded-xl  h-max-10 w-max-50">
+                <div class="bg-emerald-600 text-white  rounded-xl flex flex-col h-full text-center">
+                    <div class="font-bold text-1xl w-full bg-[#003049] px-12 py-1 rounded-t-xl border-white ">TOTAL</div>
+                  
+                    <div id = "total" class="font-bold text-white-200  py-[50%] text-center text-2xl "> <p class="px-5"> 0$ </p> </div>
+                 
+                </div>
+            </div>
+            <!-- Total -->
+
+        </div>
+
+    </div>
+
+    <script src="./Script.js"></script>
+
+</body>
+</html>
